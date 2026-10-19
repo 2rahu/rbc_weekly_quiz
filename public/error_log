@@ -1,0 +1,15 @@
+[20-Feb-2025 10:17:11 UTC] PHP Warning:  require(/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php): Failed to open stream: No such file or directory in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
+[20-Feb-2025 10:17:11 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
+[20-Feb-2025 10:17:13 UTC] PHP Warning:  require(/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php): Failed to open stream: No such file or directory in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
+[20-Feb-2025 10:17:13 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
+[20-Feb-2025 10:17:15 UTC] PHP Warning:  require(/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php): Failed to open stream: No such file or directory in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
+[20-Feb-2025 10:17:15 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/vendor/autoload.php' (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/id9lo9vdkle3/public_html/weeklyquiz.rbclearning.in/public/index.php on line 13
