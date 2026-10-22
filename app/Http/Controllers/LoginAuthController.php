@@ -30,15 +30,20 @@ class LoginAuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Login successful',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ],
-        ], 200);
+        
+return response()->json([
+    'status' => true,
+    'message' => 'Login successful',
+    'data' => [
+        'user' => [
+            'name' => $user->name,
+            'role' => $user->roles->role ?? null,
+        ],
+        'token' => $token,
+        'token_type' => 'Bearer',
+    ],
+], 200);
+
     }
 
 
