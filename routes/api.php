@@ -1,5 +1,7 @@
 <?php
 
+use App\Exports\QuestionsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
@@ -14,6 +16,12 @@ Route::apiResource('quiz-topics', QuizTopicController::class);
 Route::apiResource('quiz-set', QuizSetController::class);
 Route::apiResource('quiz-editors-questions', QuizEditorsController::class);
 Route::post('login', [LoginAuthController::class, 'login']);
+
+Route::get('questions-export', function () {
+    return Excel::download( new QuestionsExport(),
+        'questions.xlsx'
+    );
+});
 
 
 

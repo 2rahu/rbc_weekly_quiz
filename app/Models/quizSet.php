@@ -29,4 +29,5 @@ class QuizSet extends Model
             'quiz_set_id'
         );
     }
+    
 }
