@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class QuizSetController extends Controller
-{
+{   
 
     public function index()
     {

@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\quizSet;
 use App\Models\Questions;
 use App\Models\QuizTopic;
-use App\Models\QuizSetModel;
 use Illuminate\Http\Request;
-use App\Models\QuestionModel;
-use App\Models\QuizTopicModel;
 use App\Http\Controllers\Controller;
 
 class QuizQuiestionsController extends Controller

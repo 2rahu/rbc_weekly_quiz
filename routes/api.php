@@ -8,8 +8,8 @@ use App\Http\Controllers\LoginAuthController;
 use App\Http\Controllers\QuizTopicController;
 use App\Http\Controllers\QuizEditorsController;
 
-Route::apiResource('roles', RolesController::class);
 Route::apiResource('users', UsersController::class);
+Route::apiResource('roles', RolesController::class);
 Route::apiResource('quiz-topics', QuizTopicController::class);
 Route::apiResource('quiz-set', QuizSetController::class);
 Route::apiResource('quiz-editors-questions', QuizEditorsController::class);
