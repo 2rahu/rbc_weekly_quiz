@@ -32,7 +32,7 @@ class QuizSetController extends Controller
         ]);
 
         $quizSet = QuizSet::create($data);
-
+    
         return response()->json([
             'status' => true,
             'message' => 'Quiz set created successfully',
@@ -137,7 +137,7 @@ class QuizSetController extends Controller
     }
 
 
-    public function weeklyquiz($id)
+    public function weeklyquiz(int $id)
     {
         $quiz_set = QuizSet::where('quiz_set_id', $id)
             ->orderBy('created_at', 'desc')

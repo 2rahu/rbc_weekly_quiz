@@ -3,6 +3,7 @@
 use App\Exports\QuestionsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TempController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\UsersController;
 use App\Http\Controllers\QuizSetController;
@@ -19,9 +20,15 @@ Route::post('login', [LoginAuthController::class, 'login']);
 
 Route::get('questions-export', function () {
     return Excel::download( new QuestionsExport(),
-        'questions.xlsx'
+        'questions.xlsx'    
     );
 });
+
+Route::apiResource('selected-questions', TempController::class)
+    ->only(['index', 'destroy']);
+
+Route::post('select-question/{id}', [TempController::class, 'store']);
+Route::post('selected-questions-transfer', [TempController::class, 'transfer']);
 
 
 
