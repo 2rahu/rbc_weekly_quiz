@@ -15,7 +15,10 @@ Route::apiResource('users', UsersController::class);
 Route::apiResource('roles', RolesController::class);
 Route::apiResource('quiz-topics', QuizTopicController::class);
 Route::apiResource('quiz-set', QuizSetController::class);
+
 Route::apiResource('quiz-editors-questions', QuizEditorsController::class);
+Route::post('quiz-update-image/{id}', [QuizEditorsController::class, 'update_image']);
+
 Route::post('login', [LoginAuthController::class, 'login']);
 
 Route::get('questions-export', function () {
@@ -23,6 +26,7 @@ Route::get('questions-export', function () {
         'questions.xlsx'    
     );
 });
+
 
 Route::apiResource('selected-questions', TempController::class)
     ->only(['index', 'destroy']);

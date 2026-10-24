@@ -107,39 +107,36 @@ class QuizEditorsController extends Controller
     }
 
     
-    public function update_image(
-        Request $request,
-        int $id
-    ): JsonResponse {
-        try {
-            $data = $this->quizEditorService->updateImage(
-                $request,
-                $id
-            );
+   public function update_image(Request $request, int $id): JsonResponse {
+    try {
+        $data = $this->quizEditorService->updateImage(
+            $request,
+            $id
+        );
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Question image updated successfully.',
-                'data' => $data,
-            ], 200);
+        return response()->json([
+            'status' => true,
+            'message' => 'Question image updated successfully.',
+            'data' => $data,
+        ], 200);
 
-        } catch (ValidationException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed. Please check the uploaded image.',
-                'errors' => $e->errors(),
-            ], 422);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validation failed. Please check the uploaded image.',
+            'errors' => $e->errors(),
+        ], 422);
 
-        } catch (ModelNotFoundException $e) {
-            return $this->notFound();
+    } catch (ModelNotFoundException $e) {
+        return $this->notFound();
 
-        } catch (\Throwable $e) {
-            return $this->serverError(
-                $e,
-                'An error occurred while updating the question image.'
-            );
-        }
+    } catch (\Throwable $e) {
+        return $this->serverError(
+            $e,
+            'An error occurred while updating the question image.'
+        );
     }
+}
 
     public function destroy(int $id): JsonResponse
     {

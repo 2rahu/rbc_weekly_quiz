@@ -81,7 +81,7 @@ class QuizEditorService
         }
 
         $imageName = $question->ques_id . '.png';
-
+ 
         $filePath = $file->storeAs(
             'quiz_images_uploads',
             $imageName,
