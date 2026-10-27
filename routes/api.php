@@ -9,6 +9,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\QuizSetController;
 use App\Http\Controllers\LoginAuthController;
 use App\Http\Controllers\QuizTopicController;
+use App\Http\Controllers\WeeklyQuizController;
 use App\Http\Controllers\QuizEditorsController;
 
 Route::apiResource('users', UsersController::class);
@@ -34,7 +35,7 @@ Route::apiResource('selected-questions', TempController::class)
 Route::post('select-question/{id}', [TempController::class, 'store']);
 Route::post('selected-questions-transfer', [TempController::class, 'transfer']);
 
-
+Route::get('weekly-quiz/{id}',[WeeklyQuizController::class, 'getWeeklyQuiz']);
 
 Route::patch('update-password/{id}', [UsersController::class, "updatePassword"]);
 Route::patch('update-quiz-set-status/{id}', [QuizSetController::class, "changeQuizSetStatus"]);
@@ -42,6 +43,7 @@ Route::patch('update-quiz-set-status/{id}', [QuizSetController::class, "changeQu
 Route::middleware('auth:sanctum')->group(function () {
     
 });
+
 
 
 

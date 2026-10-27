@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\QuizSet;
+use App\Models\QuizTopic;
 use Illuminate\Database\Eloquent\Model;
 
 class Questions extends Model
@@ -34,4 +35,15 @@ class Questions extends Model
             'quiz_set_id'
         );
     }
+
+      public function topics()
+    {
+        return $this->belongsTo(
+            QuizTopic::class,
+            'topic_id',
+            'topic_id'
+        );
+    }
+
+    
 }
