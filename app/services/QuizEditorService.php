@@ -54,6 +54,7 @@ class QuizEditorService
    
     public function updateImage(Request $request, int $id): array
     {
+        // dd("dwjncde");
         $request->validate([
             'file_path' => [
                 'required',
@@ -66,19 +67,19 @@ class QuizEditorService
         $question = QuizEditor::findOrFail($id);
         $file = $request->file('file_path');
 
-        $imageSize = getimagesize($file->getRealPath());
+        // $imageSize = getimagesize($file->getRealPath());
 
-        if (
-            $imageSize === false ||
-            $imageSize[0] > 500 ||
-            $imageSize[1] > 300
-        ) {
-            throw ValidationException::withMessages([
-                'file_path' => [
-                    'The image dimensions must not exceed 500x300 pixels.',
-                ],
-            ]);
-        }
+        // if (
+        //     $imageSize === false ||
+        //     $imageSize[0] > 500 ||
+        //     $imageSize[1] > 300
+        // ) {
+        //     throw ValidationException::withMessages([
+        //         'file_path' => [
+        //             'The image dimensions must not exceed 500x300 pixels.',
+        //         ],
+        //     ]);
+        // }
 
         $imageName = $question->ques_id . '.png';
  
