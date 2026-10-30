@@ -11,6 +11,7 @@ use App\Services\TempService;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\SelectedQuestionsResource;
 
 class TempController extends Controller
 {
@@ -29,7 +30,7 @@ class TempController extends Controller
             return response()->json([
                 'status' => true,
                 'message' => 'Selected questions fetched successfully.',
-                'data' => $selectedQuestions,
+                'data' => SelectedQuestionsResource::collection($selectedQuestions),
             ], 200);
 
     }

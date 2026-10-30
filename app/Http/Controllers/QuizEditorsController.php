@@ -2,40 +2,45 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\QuizEditor;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Services\QuizEditorService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\QuizEditorsResource;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\QuizEditorQuestion\StoreQuizEditorsQuestions;
 use App\Http\Requests\QuizEditorQuestion\UpdateQuizEditorsQuestions;
 
 class QuizEditorsController extends Controller
 {
+     use AuthorizesRequests;
     public function __construct(
         private readonly QuizEditorService $quizEditorService
-    ) {
-    }
+    ) {}
 
   
     public function index(): JsonResponse
     {
-            $questions = $this->quizEditorService->index();
+        $this->authorize('viewAny', QuizEditor::class);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Questions fetched successfully.',
-                'data' => QuizEditorsResource::collection($questions),
-            ], 200);
+        $questions = $this->quizEditorService->index();
 
-    
+        return response()->json([
+            'status' => true,
+            'message' => 'Questions fetched successfully.',
+            'data' => QuizEditorsResource::collection($questions),
+        ], 200);
     }
 
   
-    public function store(StoreQuizEditorsQuestions $request): JsonResponse 
+    public function store(StoreQuizEditorsQuestions $request): JsonResponse
     {
+        $this->authorize('create', QuizEditor::class);
+
         try {
             $question = $this->quizEditorService->store(
                 $request->validated()
@@ -55,17 +60,22 @@ class QuizEditorsController extends Controller
         }
     }
 
-  
+ 
     public function show(int $id): JsonResponse
     {
         try {
             $question = $this->quizEditorService->show($id);
+
+            $this->authorize('view', $question);
 
             return response()->json([
                 'status' => true,
                 'message' => 'Question fetched successfully.',
                 'data' => new QuizEditorsResource($question),
             ], 200);
+
+        } catch (AuthorizationException $e) {
+            return $this->forbidden();
 
         } catch (ModelNotFoundException $e) {
             return $this->notFound();
@@ -84,6 +94,10 @@ class QuizEditorsController extends Controller
         int $id
     ): JsonResponse {
         try {
+            $question = $this->quizEditorService->show($id);
+
+            $this->authorize('update', $question);
+
             $question = $this->quizEditorService->update(
                 $id,
                 $request->validated()
@@ -94,6 +108,9 @@ class QuizEditorsController extends Controller
                 'message' => 'Question updated successfully.',
                 'data' => new QuizEditorsResource($question),
             ], 200);
+
+        } catch (AuthorizationException $e) {
+            return $this->forbidden();
 
         } catch (ModelNotFoundException $e) {
             return $this->notFound();
@@ -106,47 +123,59 @@ class QuizEditorsController extends Controller
         }
     }
 
-    
-   public function update_image(Request $request, int $id): JsonResponse {
-    try {
-        $data = $this->quizEditorService->updateImage(
-            $request,
-            $id
-        );
+    public function update_image(Request $request, int $id): JsonResponse
+    {
+        try {
+            $question = $this->quizEditorService->show($id);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Question image updated successfully.',
-            'data' => $data,
-        ], 200);
+            $this->authorize('update', $question);
 
-    } catch (ValidationException $e) {
-        return response()->json([
-            'status' => false,
-            'message' => 'Validation failed. Please check the uploaded image.',
-            'errors' => $e->errors(),
-        ], 422);
+            $data = $this->quizEditorService->updateImage($request, $id);
 
-    } catch (ModelNotFoundException $e) {
-        return $this->notFound();
+            return response()->json([
+                'status' => true,
+                'message' => 'Question image updated successfully.',
+                'data' => $data,
+            ], 200);
 
-    } catch (\Throwable $e) {
-        return $this->serverError(
-            $e,
-            'An error occurred while updating the question image.'
-        );
+        } catch (AuthorizationException $e) {
+            return $this->forbidden();
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Validation failed. Please check the uploaded image.',
+                'errors' => $e->errors(),
+            ], 422);
+
+        } catch (ModelNotFoundException $e) {
+            return $this->notFound();
+
+        } catch (\Throwable $e) {
+            return $this->serverError(
+                $e,
+                'An error occurred while updating the question image.'
+            );
+        }
     }
-}
 
+   
     public function destroy(int $id): JsonResponse
     {
         try {
+            $question = $this->quizEditorService->show($id);
+
+            $this->authorize('delete', $question);
+
             $this->quizEditorService->destroy($id);
 
             return response()->json([
                 'status' => true,
                 'message' => 'Question deleted successfully.',
             ], 200);
+
+        } catch (AuthorizationException $e) {
+            return $this->forbidden();
 
         } catch (ModelNotFoundException $e) {
             return $this->notFound();
@@ -159,9 +188,14 @@ class QuizEditorsController extends Controller
         }
     }
 
+ 
     public function toggleStatus(int $id): JsonResponse
     {
         try {
+            $question = $this->quizEditorService->show($id);
+
+            $this->authorize('update', $question);
+
             $data = $this->quizEditorService->toggleStatus($id);
 
             return response()->json([
@@ -169,6 +203,9 @@ class QuizEditorsController extends Controller
                 'message' => 'Question status updated successfully.',
                 'data' => $data,
             ], 200);
+
+        } catch (AuthorizationException $e) {
+            return $this->forbidden();
 
         } catch (ModelNotFoundException $e) {
             return $this->notFound();
@@ -181,6 +218,13 @@ class QuizEditorsController extends Controller
         }
     }
 
+    private function forbidden(): JsonResponse
+    {
+        return response()->json([
+            'status' => false,
+            'message' => 'You are not authorized to perform this action.',
+        ], 403);
+    }
 
     private function notFound(): JsonResponse
     {
@@ -190,7 +234,6 @@ class QuizEditorsController extends Controller
         ], 404);
     }
 
-  
     private function serverError(
         \Throwable $e,
         string $message

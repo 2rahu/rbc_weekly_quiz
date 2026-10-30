@@ -5,129 +5,101 @@ namespace App\Http\Controllers;
 use App\Models\Roles;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class RolesController extends Controller
 {
-    public function index()
+    use AuthorizesRequests;
+
+    public function index(): JsonResponse
     {
-            $roles = Roles::all();
+        $this->authorize('viewAny', Roles::class);
 
-            return response()->json([
-                "status" => true,
-                "message" => "Roles fetched successfully.",
-                "data" => $roles
-            ], 200);
+        $roles = Roles::all();
 
+        return response()->json([
+            'status'  => true,
+            'message' => 'Roles fetched successfully.',
+            'data'    => $roles,
+        ], 200);
     }
 
-
-    public function store(Request $request)
+    
+    public function store(Request $request): JsonResponse
     {
-            $validate = $request->validate([
-                'role' => 'required|string|unique:roles,role|max:50',
-            ]);
+        $this->authorize('create', Roles::class);
 
-            $role = Roles::create($validate);
+        $validated = $request->validate([
+            'role' => ['required', 'string', 'max:50', 'unique:roles,role'],
+        ]);
 
-            return response()->json([
-                "status" => true,
-                "message" => "Role saved successfully.",
-                "data" => $role->fresh()
-            ], 201);
+        $role = Roles::create($validated);
 
+        return response()->json([
+            'status'  => true,
+            'message' => 'Role saved successfully.',
+            'data'    => $role->fresh(),
+        ], 201);
     }
 
-
-    public function show(int $id)
+   
+    public function show(int $id): JsonResponse
     {
-        try {
-            $role = Roles::findOrFail($id);
+        $role = Roles::findOrFail($id);
 
-            return response()->json([
-                "status" => true,
-                "message" => "Role fetched successfully.",
-                "data" => $role
-            ], 200);
+        $this->authorize('view', $role);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Role not found."
-            ], 404);
-
-        } catch (\Throwable $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong.",
-                "error" => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'status'  => true,
+            'message' => 'Role fetched successfully.',
+            'data'    => $role,
+        ], 200);
     }
 
-
-    public function update(Request $request, int $id)
+  
+    public function update(Request $request, int $id): JsonResponse
     {
-        try {
-            $role = Roles::findOrFail($id);
+        $role = Roles::findOrFail($id);
 
-            $validate = $request->validate([
-                'role' => [
-                    'required',
-                    'string',
-                    'max:50',
-                    Rule::unique('roles', 'role')->ignore($role->role_id, 'role_id'),
-                ],
-            ]);
+        $this->authorize('update', $role);
 
-            $role->update($validate);
+        $validated = $request->validate([
+            'role' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('roles', 'role')
+                    ->ignore($role->role_id, 'role_id'),
+            ],
+        ]);
 
-            return response()->json([
-                "status" => true,
-                "message" => "Role updated successfully.",
-                "data" => $role->fresh()
-            ], 200);
+        $role->update($validated);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Role not found."
-            ], 404);
-
-        } catch (\Throwable $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong.",
-                "error" => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'status'  => true,
+            'message' => 'Role updated successfully.',
+            'data'    => $role->fresh(),
+        ], 200);
     }
 
-
-    public function destroy(int $id)
+  
+    public function destroy(int $id): JsonResponse
     {
-        try {
-            $role = Roles::findOrFail($id);
+        $role = Roles::findOrFail($id);
 
-            $role->delete();
+        $this->authorize('delete', $role);
 
-            return response()->json([
-                "status" => true,
-                "message" => "Role deleted successfully."
-            ], 200);
+        $role->delete();
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Role not found."
-            ], 404);
-
-        } catch (\Throwable $e) {
-            return response()->json([
-                "status" => false,
-                "message" => "Something went wrong.",
-                "error" => $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'status'  => true,
+            'message' => 'Role deleted successfully.',
+        ], 200);
     }
+    
 }

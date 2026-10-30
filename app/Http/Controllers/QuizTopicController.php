@@ -6,183 +6,79 @@ use App\Models\QuizTopic;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-
+use App\Http\Requests\Topics\StoreQuizTopicRequest;
+use App\Http\Requests\Topics\UpdateQuizTopicRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class QuizTopicController extends Controller
 {
-    /**
-     * Fetch all quiz topics.
-     */
+    use AuthorizesRequests;
+
     public function index(): JsonResponse
     {
-        try {
-            $topics = QuizTopic::all();
+        $this->authorize('viewAny', QuizTopic::class);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz topics fetched successfully.',
-                'count' => $topics->count(),
-                'data' => $topics,
-            ], 200);
+        $topics = QuizTopic::all();
 
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while fetching quiz topics.',
-                'error' => config('app.debug')
-                    ? $e->getMessage()
-                    : 'Internal server error.',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz topics fetched successfully.',
+            'data' => $topics,
+        ], 200);
     }
 
-   
-    public function store(Request $request): JsonResponse
+    public function store(StoreQuizTopicRequest $request): JsonResponse
     {
-        try {
-            $data = $request->validate([
-                'topic_name' => 'required|string|max:100',
-            ]);
+        $this->authorize('create', QuizTopic::class);
 
-            $topic = QuizTopic::create($data);
+        $topic = QuizTopic::create($request->validated());
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz topic created successfully.',
-                'data' => $topic,
-            ], 201);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed. Please check the provided input.',
-                'errors' => $e->errors(),
-            ], 422);
-
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while creating the quiz topic.',
-                'error' => config('app.debug')
-                    ? $e->getMessage()
-                    : 'Internal server error.',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz topic created successfully.',
+            'data' => $topic,
+        ], 201);
     }
 
-    /**
-     * Fetch a specific quiz topic.
-     */
     public function show(int $id): JsonResponse
     {
-        try {
-            $topic = QuizTopic::findOrFail($id);
+        $topic = QuizTopic::findOrFail($id);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz topic fetched successfully.',
-                'data' => $topic,
-            ], 200);
+        $this->authorize('view', $topic);
 
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz topic not found.',
-            ], 404);
-
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while fetching the quiz topic.',
-                'error' => config('app.debug')
-                    ? $e->getMessage()
-                    : 'Internal server error.',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz topic fetched successfully.',
+            'data' => $topic,
+        ], 200);
     }
 
-
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateQuizTopicRequest $request, int $id): JsonResponse
     {
-        try {
-            $topic = QuizTopic::findOrFail($id);
+        $topic = QuizTopic::findOrFail($id);
 
-            $data = $request->validate([
-                'topic_name' => 'required|string|max:100',
-            ]);
+        $this->authorize('update', $topic);
 
-            $topic->update($data);
+        $topic->update($request->validated());
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz topic updated successfully.',
-                'data' => $topic,
-            ], 200);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Validation failed. Please check the provided input.',
-                'errors' => $e->errors(),
-            ], 422);
-
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz topic not found.',
-            ], 404);
-
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while updating the quiz topic.',
-                'error' => config('app.debug')
-                    ? $e->getMessage()
-                    : 'Internal server error.',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz topic updated successfully.',
+            'data' => $topic->refresh(),
+        ], 200);
     }
 
-   
     public function destroy(int $id): JsonResponse
     {
-        try {
-            $topic = QuizTopic::findOrFail($id);
+        $topic = QuizTopic::findOrFail($id);
 
-            $topic->delete();
+        $this->authorize('delete', $topic);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz topic deleted successfully.',
-            ], 200);
+        $topic->delete();
 
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz topic not found.',
-            ], 404);
-
-        } catch (\Throwable $e) {
-            report($e);
-
-            return response()->json([
-                'status' => false,
-                'message' => 'An error occurred while deleting the quiz topic.',
-                'error' => config('app.debug')
-                    ? $e->getMessage()
-                    : 'Internal server error.',
-            ], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'Quiz topic deleted successfully.',
+        ], 200);
     }
-    
 }

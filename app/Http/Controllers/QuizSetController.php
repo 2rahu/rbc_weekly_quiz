@@ -3,158 +3,114 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuizSet;
-use App\Models\Questions;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class QuizSetController extends Controller
-{   
+{
+     use AuthorizesRequests;
 
-    public function index()
+    public function index(): JsonResponse
     {
+        $this->authorize('viewAny', QuizSet::class);
 
         $quizSets = QuizSet::all();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Quiz sets fetched successfully',
-            'data' => $quizSets,
-        ]);
+            'status'  => true,
+            'message' => 'Quiz sets fetched successfully.',
+            'data'    => $quizSets,
+        ], 200);
     }
 
-
-    public function store(Request $request)
+   
+    public function store(Request $request): JsonResponse
     {
+        $this->authorize('create', QuizSet::class);
 
         $data = $request->validate([
-            'quiz_launch_date' => 'required|date',
+            'quiz_launch_date' => ['required', 'date'],
         ]);
 
         $quizSet = QuizSet::create($data);
-    
+
         return response()->json([
-            'status' => true,
-            'message' => 'Quiz set created successfully',
-            'data' => $quizSet,
+            'status'  => true,
+            'message' => 'Quiz set created successfully.',
+            'data'    => $quizSet,
         ], 201);
     }
 
-
-    public function show(int $id)
-    {
-        try {
-            $quizSet = QuizSet::findOrFail($id);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz set fetched successfully',
-                'data' => $quizSet,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz set not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-    public function update(Request $request, int $id)
-    {
-        try {
-            $quizSet = QuizSet::findOrFail($id);
-
-            $data = $request->validate([
-                'quiz_launch_date' => 'required|date',    
-            ]);
-
-            $quizSet->update($data);
-
-            return response()->json([       
-                'status' => true,
-                'message' => 'Quiz set updated successfully',
-                'data' => $quizSet,
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz set not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-    public function destroy(int $id)
-    {
-        try {
-            $quizSet = QuizSet::findOrFail($id);
-
-            $quizSet->delete();
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Quiz set deleted successfully',
-            ]);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Quiz set not found',
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-
-
-    public function changeQuizSetStatus(int $id)
+  
+    public function show(int $id): JsonResponse
     {
         $quizSet = QuizSet::findOrFail($id);
-        $quizSet->is_active = !$quizSet->is_active;
+
+        $this->authorize('view', $quizSet);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Quiz set fetched successfully.',
+            'data'    => $quizSet,
+        ], 200);
+    }
+
+  
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $quizSet = QuizSet::findOrFail($id);
+
+        $this->authorize('update', $quizSet);
+
+        $data = $request->validate([
+            'quiz_launch_date' => ['required', 'date'],
+        ]);
+
+        $quizSet->update($data);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Quiz set updated successfully.',
+            'data'    => $quizSet->fresh(),
+        ], 200);
+    }
+
+    
+    public function destroy(int $id): JsonResponse
+    {
+        $quizSet = QuizSet::findOrFail($id);
+
+        $this->authorize('delete', $quizSet);
+
+        $quizSet->delete();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Quiz set deleted successfully.',
+        ], 200);
+    }
+
+    
+    public function changeQuizSetStatus(int $id): JsonResponse
+    {
+        $quizSet = QuizSet::findOrFail($id);
+
+        $this->authorize('update', $quizSet);
+
+        $quizSet->is_active = ! $quizSet->is_active;
         $quizSet->save();
 
         return response()->json([
-            'status' => true,
-            'message' => 'Quiz set status updated successfully',
-        ]);
+            'status'  => true,
+            'message' => 'Quiz set status updated successfully.',
+            'data'    => $quizSet->fresh(),
+        ], 200);
     }
 
-
-    public function weeklyquiz(int $id)
-    {
-        $quiz_set = QuizSet::where('quiz_set_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        if ($quiz_set && $quiz_set->is_active == 1) {
-            $allQuestions = Questions::with('quiztopics')
-                ->where('quiz_set_id', $quiz_set->quiz_set_id)
-                ->get();
-
-            return view('test')->with(compact('allQuestions'));
-        } else {
-            return view('inactive_quizes');
-        }
-
-        return redirect()->route('weekly.quiz');
-    }
+  
+   
+    
 }
-
-

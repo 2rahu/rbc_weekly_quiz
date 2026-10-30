@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
@@ -9,42 +10,49 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Users\StoreUsersRequest;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class UsersController extends Controller
 {
+    use AuthorizesRequests;
+    
     public function __construct(
         private readonly UserService $userService
     ) {
     }
 
-   
     public function index(): JsonResponse
     {
-       
-            $users = $this->userService->index();
+        $this->authorize('viewAny', User::class);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User fetched successfully.',
-                'data' => $users->makeHidden('role_id'),
-            ], 200);
+        $users = $this->userService->index();
 
-      
+        return response()->json([
+            'status'  => true,
+            'message' => 'Users fetched successfully.',
+            'data'    => $users->makeHidden('role_id'),
+        ], 200);
     }
 
-  
+
     public function store(StoreUsersRequest $request): JsonResponse
     {
+        $this->authorize('create', User::class);
+
         try {
             $user = $this->userService->store(
                 $request->validated()
             );
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'User created successfully.',
-                'data' => $user->makeHidden('role_id'),
+                'data'    => $user->makeHidden('role_id'),
             ], 201);
+
+        } catch (ValidationException $e) {
+            return $this->validationError($e);
 
         } catch (\Throwable $e) {
             return $this->serverError(
@@ -54,49 +62,41 @@ class UsersController extends Controller
         }
     }
 
-
+  
     public function show(int $id): JsonResponse
     {
-        try {
-            $user = $this->userService->show($id);
+        $user = $this->findUser($id);
 
-            return response()->json([
-                'status' => true,
-                'message' => 'User fetched successfully.',
-                'data' => $user->makeHidden('role_id'),
-            ], 200);
+        $this->authorize('view', $user);
 
-        } catch (ModelNotFoundException $e) {
-            return $this->notFound();
-
-        } catch (\Throwable $e) {
-            return $this->serverError(
-                $e,
-                'An error occurred while fetching the user.'
-            );
-        }
+        return response()->json([
+            'status'  => true,
+            'message' => 'User fetched successfully.',
+            'data'    => $user->makeHidden('role_id'),
+        ], 200);
     }
 
-  
+ 
     public function update(Request $request, int $id): JsonResponse
     {
+        $user = $this->findUser($id);
+
+        $this->authorize('update', $user);
+
         try {
-            $user = $this->userService->update(
+            $updatedUser = $this->userService->update(
                 $id,
                 $request->all()
             );
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'User updated successfully.',
-                'data' => $user->makeHidden('role_id'),
+                'data'    => $updatedUser->makeHidden('role_id'),
             ], 200);
 
         } catch (ValidationException $e) {
             return $this->validationError($e);
-
-        } catch (ModelNotFoundException $e) {
-            return $this->notFound();
 
         } catch (\Throwable $e) {
             return $this->serverError(
@@ -109,16 +109,17 @@ class UsersController extends Controller
   
     public function destroy(int $id): JsonResponse
     {
+        $user = $this->findUser($id);
+
+        $this->authorize('delete', $user);
+
         try {
             $this->userService->destroy($id);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'User deleted successfully.',
             ], 200);
-
-        } catch (ModelNotFoundException $e) {
-            return $this->notFound();
 
         } catch (\Throwable $e) {
             return $this->serverError(
@@ -128,10 +129,12 @@ class UsersController extends Controller
         }
     }
 
-    public function updatePassword(
-        Request $request,
-        int $id
-    ): JsonResponse {
+ 
+    public function updatePassword(Request $request, int $id): JsonResponse {
+        $user = $this->findUser($id);
+
+        $this->authorize('update', $user);
+
         try {
             $this->userService->updatePassword(
                 $id,
@@ -139,15 +142,12 @@ class UsersController extends Controller
             );
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Password updated successfully.',
             ], 200);
 
         } catch (ValidationException $e) {
             return $this->validationError($e);
-
-        } catch (ModelNotFoundException $e) {
-            return $this->notFound();
 
         } catch (\Throwable $e) {
             return $this->serverError(
@@ -157,23 +157,23 @@ class UsersController extends Controller
         }
     }
 
-    private function notFound(): JsonResponse
+ 
+    private function findUser(int $id): User
     {
-        return response()->json([
-            'status' => false,
-            'message' => 'User not found.',
-        ], 404);
+        return User::findOrFail($id);
     }
+
 
     private function validationError(
         ValidationException $e
     ): JsonResponse {
         return response()->json([
-            'status' => false,
+            'status'  => false,
             'message' => 'Validation failed.',
-            'errors' => $e->errors(),
+            'errors'  => $e->errors(),
         ], 422);
     }
+
 
     private function serverError(
         \Throwable $e,
@@ -182,12 +182,12 @@ class UsersController extends Controller
         report($e);
 
         return response()->json([
-            'status' => false,
+            'status'  => false,
             'message' => $message,
-            'error' => config('app.debug')
+            'error'   => config('app.debug')
                 ? $e->getMessage()
                 : 'Internal server error.',
         ], 500);
     }
-
+    
 }
