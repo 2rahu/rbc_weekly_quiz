@@ -20,7 +20,7 @@ Route::get('weekly-quiz/{id}', [WeeklyQuizController::class, 'getWeeklyQuiz']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     /* Added Policy */ 
     Route::apiResource('quiz-topics', QuizTopicController::class);
     Route::apiResource('quiz-set', QuizSetController::class);
