@@ -36,6 +36,7 @@ return response()->json([
     'message' => 'Login successful',
     'data' => [
         'user' => [
+            'id' => $user->id,
             'name' => $user->name,
             'role' => $user->roles->role ?? null,
         ],
